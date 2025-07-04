@@ -1,63 +1,99 @@
-# User Management API
+# UserManagementAPI
 
-A Spring Boot-based RESTful API for managing user records with full CRUD operations, input validation, and PostgreSQL integration.
+A robust Spring Boot REST API for user management, supporting CRUD operations, bulk user creation, and pagination. Built for scalability and easy integration.
+
+---
 
 ## 🚀 Features
-- Add new users with name and email
-- View all users or fetch a user by ID
-- Update existing user data
-- Delete users
-- Input validation using Jakarta Bean Validation
-- PostgreSQL database connectivity
-- Uses Spring Data JPA for easy data handling
+- Create, read, update, and delete users
+- Bulk user creation (POST multiple users)
+- Pagination support for user listing
+- Input validation
+- Mock data loading for testing
+- Comprehensive test coverage
+
+---
 
 ## 🛠️ Tech Stack
-- Java 17+
-- Spring Boot 3
-- Spring Data JPA
-- Hibernate
-- PostgreSQL
-- Maven
+- **Backend:** Java 17, Spring Boot 3, Spring Data JPA
+- **Database:** PostgreSQL (configurable)
+- **Testing:** JUnit 5, Spring Boot Test, MockMvc
+- **Build:** Maven
 
-## 📁 Project Structure
-```
-UserManagementAPI/
-├── src/
-│   └── main/
-│       ├── java/org/usermanag/UserManagementAPI/
-│       │   ├── controller/UserController.java
-│       │   ├── model/User.java
-│       │   └── repository/UserRepository.java
-│       └── resources/
-│           └── application.properties
-├── pom.xml
-```
+---
 
-## 🔧 Getting Started
-1. Clone the repository:
-   ```sh
+## ⚙️ Setup Instructions
+
+1. **Clone the repository:**
+   ```bash
    git clone https://github.com/aadityakumar08/UserManagementAPI.git
    cd UserManagementAPI
    ```
-2. Update `src/main/resources/application.properties` with your PostgreSQL credentials:
-   ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/userdb
-   spring.datasource.username=your_db_username
-   spring.datasource.password=your_db_password
-   spring.jpa.hibernate.ddl-auto=update
-   spring.jpa.show-sql=true
+2. **Configure the database:**
+   - Edit `src/main/resources/application.properties` with your PostgreSQL credentials.
+3. **Build the project:**
+   ```bash
+   mvn clean install
    ```
-3. Run the application:
-   ```sh
+4. **Run the application:**
+   ```bash
    mvn spring-boot:run
    ```
 
-## 🧪 API Endpoints
-- `GET /api/users` – Get all users
-- `GET /api/users/{id}` – Get user by ID
-- `POST /api/users` – Create new user
-- `PUT /api/users/{id}` – Update user
-- `DELETE /api/users/{id}` – Delete user
+---
 
-## License
-This project is open source and available under the [MIT License](LICENSE). 
+## 🧪 Running Tests
+
+```bash
+mvn test
+```
+
+---
+
+## 📚 API Endpoints
+
+### User CRUD
+- **Create User:**
+  - `POST /api/users`
+  - Body: `{ "name": "John Doe", "email": "john@example.com" }`
+- **Bulk Create Users:**
+  - `POST /api/users/multiple`
+  - Body: `[ { "name": "Alice", "email": "alice@example.com" }, ... ]`
+- **Get All Users:**
+  - `GET /api/users`
+- **Get User by ID:**
+  - `GET /api/users/{id}`
+- **Update User:**
+  - `PUT /api/users/{id}`
+  - Body: `{ "name": "New Name", "email": "new@example.com" }`
+- **Delete User:**
+  - `DELETE /api/users/{id}`
+- **Get Mock Users:**
+  - `GET /api/users/mock`
+- **Paginated Users:**
+  - `GET /api/users/page?page=0&size=10&sort=name,asc`
+
+### Example: Create User (cURL)
+```bash
+curl -X POST http://localhost:8080/api/users \
+  -H 'Content-Type: application/json' \
+  -d '{ "name": "John Doe", "email": "john@example.com" }'
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repo and create your branch from `main` or `testing`.
+2. Make your changes and add tests.
+3. Ensure all tests pass: `mvn test`
+4. Submit a pull request with a clear description.
+
+---
+
+## 📫 Contact
+- **Author:** Aditya Kumar
+- [LinkedIn](https://www.linkedin.com/in/aditya-kumar-302795254/)
+- [GitHub](https://github.com/aadityakumar08)
+
+--- 
