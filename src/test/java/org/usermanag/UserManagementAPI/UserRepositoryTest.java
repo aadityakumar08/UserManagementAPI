@@ -46,6 +46,40 @@ public class UserRepositoryTest {
 
 
     }
+    @Test
+    void testSavedUser() {
+        user2 = new User("Charlie Smith", "charlie@example.com");
+        User savedUser = userRepository.save(user2);
+
+        // Assert
+        assertThat(savedUser).isNotNull();
+        assertThat(savedUser.getId()).isNotNull();
+        assertThat(savedUser.getName()).isEqualTo("Charlie Smith");
+        assertThat(savedUser.getEmail()).isEqualTo("charlie@example.com");
+    }
+    @Test
+    void testUpdateUser() {
+        // Save original user first
+        User userToUpdate = new User("Real Name", "realName@example.com");
+        User savedUser = userRepository.save(userToUpdate);
+
+        // Change the values now to match the assertion
+        savedUser.setName("Updated Name");
+        savedUser.setEmail("updated@example.com");
+
+        // Save again
+        User updatedUser = userRepository.save(savedUser);
+
+        // Now verify it
+        assertThat(updatedUser.getName()).isEqualTo("Updated Name");
+        assertThat(updatedUser.getEmail()).isEqualTo("updated@example.com");
+    }
+    @Test
+    void testDeleteUser() {
+        userRepository.delete(user1);
+        Optional<User> foundUser = userRepository.findByEmail(user1.getEmail());
+        assertThat(foundUser).isNotPresent();
+    }
 
 
 }
