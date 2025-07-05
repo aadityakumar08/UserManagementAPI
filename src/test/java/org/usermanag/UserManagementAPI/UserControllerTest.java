@@ -19,6 +19,7 @@ import java.util.stream.IntStream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -99,5 +100,19 @@ public class UserControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$[0].name", is("Alice Brown")))
                 .andExpect(jsonPath("$[1].email", is("rohan.gray@example.com")));
+    }
+
+    @Test
+    void testDeleteUserFound() throws Exception {
+        mockMvc.perform(delete("/api/users/{id}", user1.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testDeleteUserNotFound() throws Exception {
+        mockMvc.perform(delete("/api/users/{id}", 999L)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }
