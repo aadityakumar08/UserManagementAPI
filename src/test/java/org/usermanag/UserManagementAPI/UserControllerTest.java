@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.usermanag.UserManagementAPI.model.User;
 import org.usermanag.UserManagementAPI.repository.UserRepository;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,8 +46,8 @@ public class UserControllerTest {
         userRepository.deleteAll();
         objectMapper.registerModule(new JavaTimeModule());
 
-        user1 = new User("John Doe", "john@example.com");
-        user2 = new User("Charlie Smith", "charlie@example.com");
+        user1 = new User("John Doe", "john@example.com", "password123");
+        user2 = new User("Charlie Smith", "charlie@example.com", "password123");
 
         List<User> savedInitialUsers = userRepository.saveAll(Arrays.asList(user1, user2));
         this.user1 = savedInitialUsers.get(0);
@@ -54,13 +55,14 @@ public class UserControllerTest {
 
         // Adding 25 more users
         List<User> manyUsers = IntStream.rangeClosed(1, 25)
-                .mapToObj(i -> new User("User " + i, "user" + i + "@example.com"))
+                .mapToObj(i -> new User("User " + i, "user" + i + "@example.com", "password123"))
                 .collect(Collectors.toList());
 
         userRepository.saveAll(manyUsers);
     }
 
     @Test
+    @WithMockUser(username="admin",roles={"ADMIN"})
     void testGetUserByIdFound() throws Exception {
         mockMvc.perform(get("/api/users/{id}", user1.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -71,10 +73,10 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username="admin",roles={"ADMIN"})
     void testCreateUser() throws Exception {
-        User newUser = new User("Alice Wonderland", "alice@example.com");
-        User newUser1 = new User("Alice Wonder", "alice1@example.com");
-        
+        User newUser1 = new User("Alice Wonder", "alice1@example.com", "password123");
+
 
         mockMvc.perform(
                 post("/api/users")
@@ -88,13 +90,14 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username="admin",roles={"ADMIN"})
     void testCreateMultipleUsers() throws Exception {
         List<User> newUsers = Arrays.asList(
-                new User("Alice Brown", "alice.brown@example.com"),
-                new User("Rohan Gray", "rohan.gray@example.com")
+                new User("Alice Brown", "alice.brown@example.com", "password123"),
+                new User("Rohan Gray", "rohan.gray@example.com", "password123")
         );
 
-        mockMvc.perform(post("/api/users/multiple")
+        mockMvc.perform(post("/api/users/bulk")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUsers)))
                 .andExpect(status().isCreated())
@@ -103,6 +106,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username="admin",roles={"ADMIN"})
     void testDeleteUserFound() throws Exception {
         mockMvc.perform(delete("/api/users/{id}", user1.getId())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -110,6 +114,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username="admin",roles={"ADMIN"})
     void testDeleteUserNotFound() throws Exception {
         mockMvc.perform(delete("/api/users/{id}", 999L)
                 .contentType(MediaType.APPLICATION_JSON))

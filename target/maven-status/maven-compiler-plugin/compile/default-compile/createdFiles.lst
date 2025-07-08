@@ -1,0 +1,7 @@
+org\usermanag\UserManagementAPI\controller\UserController.class
+org\usermanag\UserManagementAPI\Security\SecurityConfig.class
+org\usermanag\UserManagementAPI\model\User.class
+org\usermanag\UserManagementAPI\controller\UserController$1.class
+org\usermanag\UserManagementAPI\service\CustomUserDetailsService.class
+org\usermanag\UserManagementAPI\repository\UserRepository.class
+org\usermanag\UserManagementAPI\UserManagementApiApplication.class

@@ -7,12 +7,15 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.usermanag.UserManagementAPI.model.User;
 import org.usermanag.UserManagementAPI.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+//import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.context.annotation.Import;
 
+@Import(TestPasswordEncoderConfig.class)
 @DataJpaTest
 // @dataJpaTest loads only a slice of the Spring context relevant to JPA.
 public class UserRepositoryTest {
@@ -25,11 +28,14 @@ public class UserRepositoryTest {
     private User user1;
     private User user2;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
-        user1 = new User("John Doe", "john@example.com");
-        user2 = new User("Charlie Smith", "charlie@example.com");
+        user1 = new User("John Doe", "john@example.com", "password123");
+        user2 = new User("Charlie Smith", "charlie@example.com", "password123");
         entityManager.persist(user1);
         entityManager.persist(user2);
         entityManager.flush();
@@ -48,19 +54,22 @@ public class UserRepositoryTest {
     }
     @Test
     void testSavedUser() {
-        user2 = new User("Charlie Smith", "charlie@example.com");
-        User savedUser = userRepository.save(user2);
+        String rawPassword = "password123";
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+        User user = new User("Unique Name", "unique.email@example.com", encodedPassword);
+        User savedUser = userRepository.save(user);
 
         // Assert
         assertThat(savedUser).isNotNull();
         assertThat(savedUser.getId()).isNotNull();
-        assertThat(savedUser.getName()).isEqualTo("Charlie Smith");
-        assertThat(savedUser.getEmail()).isEqualTo("charlie@example.com");
+        assertThat(savedUser.getName()).isEqualTo("Unique Name");
+        assertThat(savedUser.getEmail()).isEqualTo("unique.email@example.com");
+        assertThat(passwordEncoder.matches(rawPassword, savedUser.getPassword())).isTrue();
     }
     @Test
     void testUpdateUser() {
         // Save original user first
-        User userToUpdate = new User("Real Name", "realName@example.com");
+        User userToUpdate = new User("Real Name", "realName@example.com", "password123");
         User savedUser = userRepository.save(userToUpdate);
 
         // Change the values now to match the assertion
@@ -80,6 +89,8 @@ public class UserRepositoryTest {
         Optional<User> foundUser = userRepository.findByEmail(user1.getEmail());
         assertThat(foundUser).isNotPresent();
     }
-
-
 }
+
+
+
+

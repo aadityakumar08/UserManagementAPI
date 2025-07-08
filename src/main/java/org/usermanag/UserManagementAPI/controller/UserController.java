@@ -1,6 +1,7 @@
 package org.usermanag.UserManagementAPI.controller;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,12 +12,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.usermanag.UserManagementAPI.model.User;
 import org.usermanag.UserManagementAPI.repository.UserRepository;
 
 import jakarta.validation.Valid;
 
+@CrossOrigin(origins = "http://127.0.0.1:5500/index.html") // Allow all origins (adjust as needed)
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -24,9 +27,14 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    public UserController(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     // POST single user
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
@@ -37,6 +45,8 @@ public class UserController {
         List<User> savedUsers = userRepository.saveAll(users);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUsers);
     }
+
+
 
     // GET all users
     @GetMapping
@@ -57,6 +67,13 @@ public class UserController {
         return userRepository.findById(id).map(existingUser -> {
             existingUser.setName(userDetails.getName());
             existingUser.setEmail(userDetails.getEmail());
+            if(userDetails.getPassword() != null && ! userDetails.getPassword().isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+            }
+            if(userDetails.getRoles() !=null && userDetails.getRoles().isEmpty()) {
+                existingUser.setRoles(userDetails.getRoles());
+            }
+
             User updatedUser = userRepository.save(existingUser);
             return ResponseEntity.ok(updatedUser);
         }).orElse(ResponseEntity.notFound().build());
@@ -100,4 +117,26 @@ public class UserController {
     //Testing Pagination in PostMan- GET http://localhost:8080/api/users/page?page=0&size=10&sort=name,asc/desc
 
 
+    private final PasswordEncoder passwordEncoder;
+
+    @PostMapping("/register")
+    public ResponseEntity<User> registerUser(@Valid @RequestBody User user){
+        if(userRepository.findByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Collections.singleton("USER"));
+        User savedUser= userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+    }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<List<User>> createUsers(@Valid @RequestBody List<User> users) {
+        users.forEach(user -> {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            // set roles, etc. if needed
+        });
+        List<User> savedUsers = userRepository.saveAll(users);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUsers);
+    }
 }
